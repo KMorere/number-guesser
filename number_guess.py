@@ -16,7 +16,7 @@ def random_choice(_range):
 def set_solver():
     """ Set the operator to use. """
 
-    _input = input(f"Select a solver in {SOLVER} : ")
+    _input = set_input(f"Select a solver in {SOLVER} : ")
 
     if _input in SOLVER:
         _input = pick_number(_input)
@@ -31,15 +31,15 @@ def pick_number(_solver):
     :return: Returns the calculated number.
     """
 
-    _n1 = input(f"Select a number in {cards} : ")
+    _n1 = set_input(f"Select a number in {cards} : ")
     while _n1 not in str(cards):
-        _n1 = input(f"Select a number in {cards} : ")
+        _n1 = set_input(f"Select a number in {cards} : ")
     _n1 = int(_n1)
     cards.pop(cards.index(_n1))
 
-    _n2 = input(f"Select another number in {cards} : ")
+    _n2 = set_input(f"Select another number in {cards} : ")
     while _n2 not in str(cards):
-        _n2 = input(f"Select another number in {cards} : ")
+        _n2 = set_input(f"Select another number in {cards} : ")
     _n2 = int(_n2)
     cards.pop(cards.index(_n2))
 
@@ -64,7 +64,32 @@ def solve_number(_n1, _n2, _solver):
         case "/":
             _result = _n1/_n2
 
-    return _result
+    return int(_result)
+
+
+def set_input(_text):
+    """ Used to set input and check if the user wants to end. """
+
+    _input = input(_text)
+
+    if _input == "stop":
+        end_game()
+
+        return None
+
+    return _input
+
+
+def end_game():
+    """ Display end results. """
+
+    print(f"Number to guess was : {number_to_guess}.")
+
+    if len(cards) == 1:
+        print(f"Final result : {cards[0]}")
+        print("Correct" if cards[0] == number_to_guess else "False")
+
+    cards.clear()
 
 
 NUMBER_RANGE = [101, 999]
@@ -77,10 +102,10 @@ cards = random_choice(CARDS)
 if __name__ == "__main__":
     number_to_guess = random_range(NUMBER_RANGE)
 
-    while len(cards) != 1:
-        set_solver()
+    print("Guess a number in the cards, type 'stop' to end the program !\n")
+
+    while len(cards) > 1:
+        print(set_solver())
         print()
     else:
-        print(f"Final result : {cards[0]}")
-        print("Correct" if cards[0] == number_to_guess else "False",
-              f"Number to guess was : {number_to_guess}.")
+        end_game()
