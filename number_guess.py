@@ -7,12 +7,6 @@ def random_range(_range):
     return random.randint(_range[0], _range[len(_range)-1])
 
 
-def random_choice(_range):
-    """ Choose a random number list from '_range'. """
-
-    return random.sample(_range, 6)
-
-
 def set_solver():
     """ Set the operator to use. """
 
@@ -56,56 +50,110 @@ def solve_number(_n1, _n2, _solver):
 
     match _solver:
         case "+":
-            _result = _n1+_n2
+            _result = add(_n1, _n2)
         case "-":
-            _result = _n1-_n2
+            _result = sub(_n1, _n2)
         case "*":
-            _result = _n1*_n2
+            _result = multiply(_n1, _n2)
         case "/":
-            _result = _n1/_n2
+            _result = divide(_n1, _n2)
 
-    return int(_result)
+    return abs(_result)
+
+
+def solve_ai():
+    """ Use numbers randomly. """
+    global cards
+
+    _n1 = random.choice(cards)
+    cards.pop(cards.index(_n1))
+
+    _n2 = random.choice(cards)
+    cards.pop(cards.index(_n2))
+
+    _solver = random.choice(SOLVER)
+
+    _new_number = solve_number(_n1, _n2, _solver)
+    cards.append(_new_number)
+
+    return _new_number
 
 
 def set_input(_text):
     """ Used to set input and check if the user wants to end. """
-
     _input = input(_text)
 
     if _input == "stop":
-        end_game()
-
-        return None
+        cards.clear()
+        cards.append(0)
 
     return _input
+
+
+def init_game():
+    """ Initialize the start of the game. """
+    global NUMBER_TO_GUESS
+    NUMBER_TO_GUESS = random_range(NUMBER_RANGE)
+
+    global CARDS
+    CARDS = [x for x in range(1, 11)] * 2 + [25, 50, 75, 100]
+
+    global cards
+    cards = random.sample(CARDS, 6)
+
+    print("-----[Guess the number using the cards, type 'stop' to end the program !]-----\n")
+
+    return set_mode()
+
+
+def set_mode():
+    """ Set the mode between user guess or AI guess. """
+    _mode = ""
+
+    while _mode not in MODES and _mode != "stop":
+        _mode = set_input(f"Select mode {MODES} : ")
+
+    return _mode.lower()
 
 
 def end_game():
     """ Display end results. """
 
-    print(f"Number to guess was : {number_to_guess}.")
-
-    if len(cards) == 1:
+    if cards[0] == NUMBER_TO_GUESS:
         print(f"Final result : {cards[0]}")
-        print("Correct" if cards[0] == number_to_guess else "False")
+        print(f"Spot on !")
+    else:
+        print(f"Final result : {cards[0]}")
+        print(f"You are {abs(cards[0] - NUMBER_TO_GUESS)} away.")
 
     cards.clear()
 
 
+add = lambda x,y:x+y
+sub = lambda x,y:x-y
+multiply = lambda x,y:x*y
+divide = lambda x,y:x//y
+
+
 NUMBER_RANGE = [101, 999]
+NUMBER_TO_GUESS = random_range(NUMBER_RANGE)
 CARDS = [x for x in range(1, 11)] * 2 + [25, 50, 75, 100]
 SOLVER = ["+", "-", "*", "/"]
+MODES = ["guess", "solve"]
 
 reader = ""
-cards = random_choice(CARDS)
+cards = random.sample(CARDS, 6)
 
 if __name__ == "__main__":
-    number_to_guess = random_range(NUMBER_RANGE)
-
-    print("Guess a number in the cards, type 'stop' to end the program !\n")
+    mode = init_game()
 
     while len(cards) > 1:
-        print(set_solver())
-        print()
+        print(f"Number to guess is : [{NUMBER_TO_GUESS}]")
+        print(f"Cards : {cards}")
+
+        if mode == MODES[0]:
+            print(set_solver())
+        else:
+            print(solve_ai())
     else:
         end_game()
