@@ -1,4 +1,5 @@
 import random
+from copy import deepcopy
 
 
 def random_range(_range):
@@ -64,19 +65,74 @@ def solve_number(_n1, _n2, _solver):
 def solve_ai():
     """ Use numbers randomly. """
     global cards
+    #cards = random.sample(CARDS, 6)
+    _cards = deepcopy(cards)
+    _turn = 0
+    _tries = []
 
-    _n1 = random.choice(cards)
-    cards.pop(cards.index(_n1))
+    _div = [x for x in _cards if NUMBER_TO_GUESS % x == 0] # [!] MAKE A POSSIBLE ANSWER IN FUNCTION.
+    while len(_div) == 0:
+        cards = random.sample(CARDS, 6)
+        _div = [x for x in _cards if NUMBER_TO_GUESS % x == 0]
+    print(f"Cards : {cards}")
 
-    _n2 = random.choice(cards)
-    cards.pop(cards.index(_n2))
+    while _cards[0] != NUMBER_TO_GUESS:
+        _cards = deepcopy(cards)
 
-    _solver = random.choice(SOLVER)
+        for i, div in enumerate(_div):
+            try:
+                _cards.remove(div)
+            except ValueError as e:
+                print(e)
 
-    _new_number = solve_number(_n1, _n2, _solver)
-    cards.append(_new_number)
+            while len(_cards) > 1:
+                _n1 = random.choice(_cards)
+                _cards.pop(_cards.index(_n1))
 
-    return _new_number
+                _n2 = random.choice(_cards)
+                _cards.pop(_cards.index(_n2))
+
+                _solver = random.choice(SOLVER)
+
+                _new_number = solve_number(_n1, _n2, _solver)
+                if _new_number > 0:
+                    _cards.append(_new_number)
+                    _tries.append(_n1)
+                    _tries.append(_solver)
+                    _tries.append(_n2)
+            if len(_cards) == 1 and _cards[0] == NUMBER_TO_GUESS//div:
+                _tries.append(_cards[0])
+                _tries.append('*')
+                _tries.append(div)
+                _cards.append(_cards[0] * div)
+                _cards.remove(_cards[0])
+
+                cards.clear()
+                cards.append(_cards[0])
+
+                return f"Solved number in {_turn} tries, operation results : {_tries}"
+            else:
+                _cards = deepcopy(cards)
+                _turn += 1
+                _tries = []
+        # while len(_cards) > 1:
+        #     _n1 = random.choice(_cards)
+        #     _cards.pop(_cards.index(_n1))
+        #
+        #     _n2 = random.choice(_cards)
+        #     _cards.pop(_cards.index(_n2))
+        #
+        #     _solver = random.choice(SOLVER)
+        #
+        #     _new_number = solve_number(_n1, _n2, _solver)
+        #     if _new_number > 0:
+        #         _cards.append(_new_number)
+        #         _tries.append(_n1)
+        #         _tries.append(_solver)
+        #         _tries.append(_n2)
+        #
+        #     return _new_number
+    return f"Solved number in {_turn} tries, operation results : {_tries}"
 
 
 def set_input(_text):
