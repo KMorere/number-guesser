@@ -8,6 +8,38 @@ def random_range(_range):
     return random.randint(_range[0], _range[len(_range)-1])
 
 
+def create_number():
+    """ Use the available numbers to create a solvable final one. """
+
+    global cards
+    _cards = deepcopy(cards)
+    _number = 0
+
+    while _number not in range(NUMBER_RANGE[0], NUMBER_RANGE[1]):
+        _cards = deepcopy(cards)
+        _number = 0
+
+        while len(_cards) > 1:
+            _n1 = random.choice(_cards)
+            _cards.pop(_cards.index(_n1))
+
+            _n2 = random.choice(_cards)
+            _cards.pop(_cards.index(_n2))
+
+            if _number < NUMBER_RANGE[0]:
+                _solver = SOLVER[random.choice([0, 2])] # + or *.
+            elif _number > NUMBER_RANGE[1]:
+                _solver = SOLVER[random.choice([1, 3])] # - or /.
+            else:
+                _solver = random.choice(SOLVER) # Random.
+
+            _number = solve_number(_n1, _n2, _solver)
+            _cards.append(_number)
+        _number = _cards[0]
+
+    return _number
+
+
 def set_solver():
     """ Set the operator to use. """
 
@@ -63,9 +95,11 @@ def solve_number(_n1, _n2, _solver):
 
 
 def solve_ai():
-    """ Use numbers randomly. """
+    """ AI used to find a solution to the number.
+        Divide the wanted number by one of the cards,
+        Try finding the result and multiply it by the divider.
+    """
     global cards
-    #cards = random.sample(CARDS, 6)
     _cards = deepcopy(cards)
     _turn = 0
     _tries = []
@@ -149,7 +183,8 @@ def set_input(_text):
 def init_game():
     """ Initialize the start of the game. """
     global NUMBER_TO_GUESS
-    NUMBER_TO_GUESS = random_range(NUMBER_RANGE)
+    NUMBER_TO_GUESS = create_number()
+    #NUMBER_TO_GUESS = random_range(NUMBER_RANGE)
 
     global CARDS
     CARDS = [x for x in range(1, 11)] * 2 + [25, 50, 75, 100]
@@ -192,7 +227,6 @@ divide = lambda x,y:x//y
 
 
 NUMBER_RANGE = [101, 999]
-NUMBER_TO_GUESS = random_range(NUMBER_RANGE)
 CARDS = [x for x in range(1, 11)] * 2 + [25, 50, 75, 100]
 SOLVER = ["+", "-", "*", "/"]
 MODES = ["guess", "solve"]
@@ -200,14 +234,17 @@ MODES = ["guess", "solve"]
 reader = ""
 cards = random.sample(CARDS, 6)
 
+#NUMBER_TO_GUESS = random_range(NUMBER_RANGE)
+NUMBER_TO_GUESS = 0
+
 if __name__ == "__main__":
     mode = init_game()
 
-    while len(cards) > 1:
+    if len(cards) > 1:
         print(f"Number to guess is : [{NUMBER_TO_GUESS}]")
-        print(f"Cards : {cards}")
 
-        if mode == MODES[0]:
+        while mode == MODES[0]:
+            print(f"Cards : {cards}")
             print(set_solver())
         else:
             print(solve_ai())
